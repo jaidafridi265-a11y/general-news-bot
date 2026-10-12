@@ -1,0 +1,41 @@
+name: General News Bot
+
+on:
+  schedule:
+    - cron: "30 */3 * * *"   # প্রতি ৩ ঘণ্টায় (UTC), প্রথম রিপো থেকে ৩০ মিনিট পরে
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libraqm0 libfribidi0 libharfbuzz0b
+          pip install -r requirements.txt
+      - name: Run bot (general news)
+        env:
+          PROFILE: general
+          PAGE_NAME: ""    # পেজের নাম লিখলে কার্ডের নিচে আসবে
+          PAGE_URL: ""     # পেজের লিংক দিলে কার্ডে QR কোড আসবে
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          FB_PAGE_TOKEN: ${{ secrets.FB_PAGE_TOKEN }}
+          FB_PAGE_ID: ${{ secrets.FB_PAGE_ID }}
+          MAX_POSTS: "1"
+          PUBLISH: "true"
+        run: python bot.py
+      - name: Save state
+        run: |
+          git config user.name "news-bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add posted_general.json feed_general.xml || true
+          git commit -m "update posted" || echo "no changes"
+          git push || true
