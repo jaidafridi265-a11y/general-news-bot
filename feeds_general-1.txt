@@ -1,0 +1,13 @@
+# বাংলাদেশি নিউজ পোর্টাল (সব ধরনের খবর): প্রতি লাইনে একটি RSS লিংক
+# লিংকগুলো ফিডস্পটের তালিকা থেকে নেওয়া, প্রকাশকদের নিজস্ব ফিড
+https://www.jagonews24.com/rss/rss.xml
+https://www.banglatribune.com/feed/
+https://www.bd24live.com/bangla/feed/
+https://www.risingbd.com/rss/rss.xml
+https://www.daily-bangladesh.com/rss/rss.xml
+https://www.ajkerpatrika.com/feed/
+https://www.bd-journal.com/feed/latest-rss.xml
+
+# আন্তর্জাতিক খবর চাইলে নিচের লাইনগুলোর শুরু থেকে # তুলে দিন
+# https://feeds.bbci.co.uk/news/world/asia/rss.xml
+# https://www.theguardian.com/international/rss
