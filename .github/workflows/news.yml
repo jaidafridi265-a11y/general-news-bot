@@ -2,7 +2,7 @@ name: General News Bot
 
 on:
   schedule:
-    - cron: "30 */3 * * *"   # প্রতি ৩ ঘণ্টায় (UTC), প্রথম রিপো থেকে ৩০ মিনিট পরে
+    - cron: "30 1-17 * * *"   # বাংলাদেশ সময় সকাল ৭টা থেকে রাত ১১টা, প্রতি ঘণ্টায় (UTC = BD - ৬)
   workflow_dispatch:
 
 permissions:
