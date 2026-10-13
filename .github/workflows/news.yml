@@ -24,7 +24,7 @@ jobs:
       - name: Run bot (general news)
         env:
           PROFILE: general
-          PAGE_NAME: ""    # পেজের নাম লিখলে কার্ডের নিচে আসবে
+          PAGE_NAME: "GAZNI VISION"
           PAGE_URL: ""     # পেজের লিংক দিলে কার্ডে QR কোড আসবে
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           FB_PAGE_TOKEN: ${{ secrets.FB_PAGE_TOKEN }}
