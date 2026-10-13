@@ -30,6 +30,8 @@ GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "").strip()
 MAX_POSTS = int(os.environ.get("MAX_POSTS", "1"))
 PUBLISH = os.environ.get("PUBLISH", "false").lower() == "true"
 USE_SOURCE_IMAGE = os.environ.get("USE_SOURCE_IMAGE", "true").lower() == "true"
+# সোর্স লিংক কোথায় যাবে: "caption" (ডিফল্ট) বা "comment"
+LINK_IN = os.environ.get("LINK_IN", "caption").strip().lower()
 
 LOGO_PATH = CFG["logo"] if os.path.exists(CFG["logo"]) else "logo.png"
 STATE_FILE = CFG["state"]
@@ -542,38 +544,28 @@ def make_card(headline, photo=None, credit="", link=""):
     except Exception as e:
         print("logo skipped:", e)
 
-    # ফুটার সারি: ওয়েবসাইট | বিস্তারিত কমেন্টে | QR
-    fy = p_bot - 82
-    host = host_of(link) if link else ""
-    if host:
-        d.ellipse([60, fy + 4, 92, fy + 36], outline="white", width=3)
-        d.ellipse([69, fy + 4, 83, fy + 36], outline="white", width=2)
-        d.line([60, fy + 20, 92, fy + 20], fill="white", width=2)
-        d.text((104, fy), host[:26], font=make_font(34), fill="white")
-    pill_f = make_font(30)
-    pt = "বিস্তারিত কমেন্টে"
-    pw = tw(d, pt, pill_f)
-    px = W / 2 - pw / 2 + (30 if host else 0)
-    img = overlay_round(img, [px - 28, fy - 6, px + pw + 28, fy + 48], 26, (255, 255, 255, 38))
-    d = ImageDraw.Draw(img)
-    d.text((px, fy), pt, font=pill_f, fill="white")
+    # ফুটার সারি: মাঝখানে পেজের নাম (লিংক নেই), ডানে ঐচ্ছিক QR
+    fy = p_bot - 84
+    page_name = os.environ.get("PAGE_NAME", "").strip()
+    if page_name:
+        nf = make_font(46)
+        nw = tw(d, page_name, nf)
+        img = overlay_round(img, [W / 2 - nw / 2 - 40, fy - 12, W / 2 + nw / 2 + 40, fy + 64], 34, (255, 255, 255, 40))
+        d = ImageDraw.Draw(img)
+        d.text((W / 2 - nw / 2, fy - 4), page_name, font=nf, fill="white")
     page_url = os.environ.get("PAGE_URL", "").strip()
     if page_url:
         qr = make_qr(page_url, 118)
         if qr:
             img.paste(qr, (W - 60 - 118, p_bot - 138))
 
-    # নিচের ব্র্যান্ড বার
-    page_name = os.environ.get("PAGE_NAME", "").strip()
+    # নিচের বার: বিস্তারিত কমেন্টে + ফলো করার আহ্বান
     follow = os.environ.get("FOLLOW_TEXT", "আরও খবরের জন্য পেজটি ফলো করুন").strip()
-    if page_name:
-        nf = make_font(46)
-        d.text(((W - tw(d, page_name, nf)) / 2, p_bot + 22), page_name, font=nf, fill=(255, 226, 40))
-        ff = make_font(28)
-        d.text(((W - tw(d, follow, ff)) / 2, p_bot + 88), follow, font=ff, fill=(235, 235, 245))
-    else:
-        ff = make_font(34)
-        d.text(((W - tw(d, follow, ff)) / 2, p_bot + 52), follow, font=ff, fill=(255, 226, 40))
+    cf2 = make_font(40)
+    ct2 = "বিস্তারিত কমেন্টে" if LINK_IN == "comment" else "বিস্তারিত ক্যাপশনে"
+    d.text(((W - tw(d, ct2, cf2)) / 2, p_bot + 28), ct2, font=cf2, fill=(255, 226, 40))
+    ff = make_font(28)
+    d.text(((W - tw(d, follow, ff)) / 2, p_bot + 94), follow, font=ff, fill=(235, 235, 245))
 
     buf = io.BytesIO()
     img.save(buf, "PNG")
@@ -666,8 +658,10 @@ def main():
             text = f"{headline}\n\n{caption}\n\nসূত্র: {item['source']}"
             if photo:
                 text += f"\nছবি: {item['source']}"
+            if LINK_IN != "comment":
+                text += f"\n\nবিস্তারিত: {item['link']}"
             post_id = post_fb(card, text)
-            if post_id and PUBLISH:
+            if post_id and PUBLISH and LINK_IN == "comment":
                 time.sleep(5)
                 comment_fb(post_id, f"বিস্তারিত: {item['link']}")
             state.append(item["uid"])
